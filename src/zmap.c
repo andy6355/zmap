@@ -180,8 +180,6 @@ static void summary(void)
 static void start_zmap(void)
 {
 	log_info("zmap", "started");
-
-	// finish setting up configuration
 	if (zconf.iface == NULL) {
 		char errbuf[PCAP_ERRBUF_SIZE];
 		char *iface = pcap_lookupdev(errbuf);
@@ -223,7 +221,6 @@ static void start_zmap(void)
 				  zconf.gw_mac[0], zconf.gw_mac[1], zconf.gw_mac[2],
 				  zconf.gw_mac[3], zconf.gw_mac[4], zconf.gw_mac[5]);
 	}
-
 	// initialization
 	if (zconf.output_module && zconf.output_module->init) {
 		zconf.output_module->init(&zconf, zconf.output_fields,
@@ -446,7 +443,6 @@ int main(int argc, char *argv[])
 				CMDLINE_PARSER_PACKAGE, args.probe_module_arg);
 	  exit(EXIT_FAILURE);
 	}
-
 	// now that we know the probe module, let's find what it supports
 	memset(&zconf.fsconf, 0, sizeof(struct fieldset_conf));
 	// the set of fields made available to a user is constructed
@@ -498,6 +494,11 @@ int main(int argc, char *argv[])
 			&zconf.fsconf.defs, zconf.output_fields,
 			zconf.output_fields_len);
 
+	// find if zmap wants any specific cidrs scanned instead
+	// of the entire Internet
+	zconf.destination_cidrs = args.inputs;
+	zconf.destination_cidrs_len = args.inputs_num;
+
 	SET_BOOL(zconf.dryrun, dryrun);
 	SET_BOOL(zconf.quiet, quiet);
 	SET_BOOL(zconf.summary, summary);
@@ -505,7 +506,6 @@ int main(int argc, char *argv[])
 	zconf.senders = args.sender_threads_arg;
 	SET_IF_GIVEN(zconf.output_filename, output_file);
 	SET_IF_GIVEN(zconf.blacklist_filename, blacklist_file);
-	SET_IF_GIVEN(zconf.whitelist_filename, whitelist_file);
 	SET_IF_GIVEN(zconf.probe_args, probe_args);
 	SET_IF_GIVEN(zconf.output_args, output_args);
 	SET_IF_GIVEN(zconf.iface, interface);
@@ -514,7 +514,6 @@ int main(int argc, char *argv[])
 	SET_IF_GIVEN(zconf.rate, rate);
 	SET_IF_GIVEN(zconf.packet_streams, probes);
 	
-
 	if (zconf.probe_module->port_args) {
 		if (args.source_port_given) {
 			char *dash = strchr(args.source_port_arg, '-');
