@@ -494,10 +494,6 @@ int main(int argc, char *argv[])
 			&zconf.fsconf.defs, zconf.output_fields,
 			zconf.output_fields_len);
 
-	// find if zmap wants any specific cidrs scanned instead
-	// of the entire Internet
-	zconf.destination_cidrs = args.inputs;
-	zconf.destination_cidrs_len = args.inputs_num;
 
 	SET_BOOL(zconf.dryrun, dryrun);
 	SET_BOOL(zconf.quiet, quiet);
@@ -513,6 +509,19 @@ int main(int argc, char *argv[])
 	SET_IF_GIVEN(zconf.max_results, max_results);
 	SET_IF_GIVEN(zconf.rate, rate);
 	SET_IF_GIVEN(zconf.packet_streams, probes);
+
+	// find if zmap wants any specific cidrs scanned instead
+	// of the entire Internet
+	zconf.destination_cidrs = args.inputs;
+	zconf.destination_cidrs_len = args.inputs_num;
+	if (zconf.destination_cidrs && zconf.blacklist_filename
+			&& !strcmp(zconf.blacklist_filename, "/etc/zmap/blacklist.conf")) {
+		log_warn("blacklist", "ZMap is currently using the default blacklist located "
+				"at /etc/zmap/blacklist.conf. By default, this blacklist excludes locally "
+				"scoped networks (e.g. 10.0.0.0/8, 127.0.0.1/8, and 192.168.0.0/16). If you are"
+				" trying to scan local networks, you can change the default blacklist by "
+				"editing the default ZMap configuration at /etc/zmap/zmap.conf.");
+	}
 	
 	if (zconf.probe_module->port_args) {
 		if (args.source_port_given) {

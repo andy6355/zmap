@@ -155,6 +155,15 @@ int cyclic_init(uint32_t primroot_, uint32_t current_)
 		return -1;
 	}
 	num_addrs = blacklist_count_allowed();
+	if (!num_addrs) {
+		log_error("blacklist", "no addresses are eligible to be scanned in the "
+				"current configuration. This may be because the "
+				"blacklist being used by ZMap (%s) prevents "
+				"any addresses from receiving probe packets.",
+				zconf.blacklist_filename
+			);
+		exit(EXIT_FAILURE);
+	}
 
 	const cyclic_group_t *cur_group = NULL;
 	for (uint32_t i=0; i<sizeof(groups)/sizeof(groups[0]); i++) {
