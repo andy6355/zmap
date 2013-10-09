@@ -9,6 +9,7 @@ SET(LIB_SOURCES
 	${PROJECT_SOURCE_DIR}/lib/blacklist.c
 	${PROJECT_SOURCE_DIR}/lib/constraint.c
 	${PROJECT_SOURCE_DIR}/lib/logger.c
+	${PROJECT_SOURCE_DIR}/lib/pbm.c
 	${PROJECT_SOURCE_DIR}/lib/random.c
 	${PROJECT_SOURCE_DIR}/lib/rijndael-alg-fst.c
 )
