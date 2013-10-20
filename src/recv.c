@@ -35,6 +35,7 @@
 #include "state.h"
 #include "validate.h"
 #include "fieldset.h"
+#include "expression.h"
 #include "probe_modules/probe_modules.h"
 #include "output_modules/output_modules.h"
 
@@ -127,6 +128,9 @@ void packet_cb(u_char __attribute__((__unused__)) *user,
 		goto cleanup;
 	}
 	if (is_repeat && zconf.filter_duplicates) {
+		goto cleanup;
+	}
+	if (!evaluate_expression(zconf.filter.expression, fs)) {
 		goto cleanup;
 	}
 	o = translate_fieldset(fs, &zconf.fsconf.translation);

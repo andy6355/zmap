@@ -126,7 +126,7 @@ static int check_coprime(uint64_t check, const cyclic_group_t *group)
 static uint64_t find_primroot(const cyclic_group_t *group)
 {
 	// what luck, rand() returns a uint32_t!
-	uint32_t candidate = (uint32_t) aesrand_getword() & 0xFFFF;
+	uint32_t candidate = (uint32_t) aesrand_getword() & 0xFFFFFFFF;
 	while(check_coprime(candidate, group) != COPRIME) {
 		++candidate;
 	}
@@ -169,7 +169,8 @@ int cyclic_init(uint32_t primroot_, uint32_t current_)
 	for (uint32_t i=0; i<sizeof(groups)/sizeof(groups[0]); i++) {
 		if (groups[i].prime > num_addrs) {
 			cur_group = &groups[i];
-			log_debug("cyclic", "using prime %lu, known_primroot %lu", cur_group->prime, cur_group->known_primroot);
+			log_debug("cyclic", "using prime %lu, known_primroot %lu",
+					cur_group->prime, cur_group->known_primroot);
 			prime = groups[i].prime;
 			break;
 		}
@@ -185,14 +186,14 @@ int cyclic_init(uint32_t primroot_, uint32_t current_)
 			primroot = find_primroot(cur_group);
 		} while (primroot >= (1LL << 32));
 		log_debug(LSRC, "primitive root: %lld", primroot);
-		current = (uint32_t) aesrand_getword() & 0xFFFF;
+		current = (uint32_t) aesrand_getword() & 0xFFFFFFFF;
 		log_debug(LSRC, "starting point: %lld", current);
 	} else {
 		primroot = primroot_;
 		log_debug(LSRC, "primitive root %lld specified by caller",
 				primroot);
 		if (!current_) {
-			current = (uint32_t) aesrand_getword() & 0xFFFF;
+			current = (uint32_t) aesrand_getword() & 0xFFFFFFFF;
 			log_debug(LSRC, "no cyclic starting point, "
 					 "selected random startpoint: %lld",
 					 current);

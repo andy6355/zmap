@@ -12,6 +12,8 @@ SET(LIB_SOURCES
 	${PROJECT_SOURCE_DIR}/lib/pbm.c
 	${PROJECT_SOURCE_DIR}/lib/random.c
 	${PROJECT_SOURCE_DIR}/lib/rijndael-alg-fst.c
+	${PROJECT_SOURCE_DIR}/lib/stack.c
+	${PROJECT_SOURCE_DIR}/lib/xalloc.c
 )
 
 # ADD YOUR PROBE MODULE HERE
@@ -25,8 +27,6 @@ SET(EXTRA_OUTPUT_MODULES
 	)
 
 SET(OUTPUT_MODULE_SOURCES
-#	output_modules/module_extended_file.c
-#	output_modules/module_simple_file.c
 	output_modules/module_csv.c
 	output_modules/output_modules.c
 	)
@@ -42,7 +42,9 @@ SET(PROBE_MODULE_SOURCES
 SET(SOURCES
 	aesrand.c
 	cyclic.c
+	expression.c
 	fieldset.c
+	filter.c
 	get_gateway.c
 	monitor.c
 	recv.c
@@ -52,6 +54,8 @@ SET(SOURCES
 	zmap.c
 	zopt_compat.c
 	"${CMAKE_CURRENT_BINARY_DIR}/zopt.h"
+	"${CMAKE_CURRENT_BINARY_DIR}/lexer.c"
+	"${CMAKE_CURRENT_BINARY_DIR}/parser.c"
 	${EXTRA_PROBE_MODULES}
 	${EXTRA_OUTPUT_MODULES}
 	${PROBE_MODULE_SOURCES}
@@ -69,6 +73,14 @@ endif()
 
 add_custom_command(OUTPUT zopt.h
 	COMMAND gengetopt -C --no-help --no-version --unamed-opts=SUBNETS -i "${CMAKE_CURRENT_SOURCE_DIR}/zopt.ggo" -F "${CMAKE_CURRENT_BINARY_DIR}/zopt"
+	)
+
+add_custom_command(OUTPUT lexer.c
+	COMMAND flex -o "${CMAKE_CURRENT_BINARY_DIR}/lexer.c" --header-file="${CMAKE_CURRENT_BINARY_DIR}/lexer.h" lexer.l
+	)
+
+add_custom_command(OUTPUT parser.c
+	COMMAND byacc -d -o parser.c parser.y
 	)
 
 add_executable(zmap ${SOURCES})
