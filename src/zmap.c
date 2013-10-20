@@ -111,6 +111,10 @@ static void* start_recv(__attribute__((unused)) void *arg)
 static void drop_privs()
 {
 	struct passwd *pw;
+	if (geteuid() != 0) {
+		log_warn("zmap", "not root, not dropping privs");
+		return;
+	}
 	if ((pw = getpwnam("nobody")) != NULL) {
 		if (setuid(pw->pw_uid) == 0) {
 			return; // success
