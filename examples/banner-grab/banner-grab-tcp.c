@@ -22,6 +22,7 @@
 #include <ulimit.h>
 
 #define MAX_BANNER_LEN 1024
+#define LEN_DOMAIN     128
 #define BASE64_ALPHABET  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
 struct config {
@@ -51,6 +52,7 @@ struct config {
 struct state {
 	struct config *conf;
 	uint32_t ip;
+    char   domain[LEN_DOMAIN];
 	enum {CONNECTING, CONNECTED, RECEIVED} state;
 };
 
@@ -108,8 +110,7 @@ void connect_cb(struct bufferevent *bev, short events, void *arg)
 			struct evbuffer *evout = bufferevent_get_output(bev);
 			// HACK!!! TODO: make some messy parser that replaces ${IP} with IP etc
 			// and allow null characters
-			evbuffer_add_printf(evout, conf->send_str,
-					inet_ntoa(addr), inet_ntoa(addr), inet_ntoa(addr), inet_ntoa(addr));	
+			evbuffer_add_printf(evout, conf->send_str, st->domain);	
 		}
 
 		// Change from connect timeout to read timeout
@@ -167,7 +168,7 @@ void read_cb(struct bufferevent *bev, void *arg)
 		}
 		evbuffer_remove(in, buf, len);
 		
-		printf("%s ", inet_ntoa(addr));
+		printf("%s ", st->domain);
 
 		if (st->conf->format == FORMAT_ASCII) {
 			// Ascii
@@ -298,12 +299,22 @@ void stdin_readcb(struct bufferevent *bev, void *arg)
 		port = atoi(port_str);
 		*/
 		//printf("scanning %s:%d\n", ip
+		char *p = strchr(ip_str,';');
+        if (p == NULL)
+        {
+            continue;
+        }
+        char ip[32] = {0};
+        memcpy(ip, ip_str, p - ip_str); 
 		
 		conf->current_running++;
 		st = malloc(sizeof(*st));
 		st->conf = conf;
-		st->ip = inet_addr(ip_str);
+		st->ip = inet_addr(ip);
+        memset(st->domain, 0, LEN_DOMAIN);
+        strcpy(st->domain, p + 1);
 		grab_banner(st);
+        free(line);
 	}
 }
 
