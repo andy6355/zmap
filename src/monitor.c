@@ -106,10 +106,10 @@ double compute_remaining_time(double age)
 		double remaining[] = {INFINITY, INFINITY, INFINITY};
 		if (zsend.targets) {
 			double done = (double)zsend.sent/zsend.targets;
-			remaining[0] = (1. - done)*(age/done) + zconf.cooldown_secs;
+			remaining[0] = (1. - done)*(age/done) + zconf.cooldown_secs/1000;
 		}
 		if (zconf.max_runtime) {
-			remaining[1] = (zconf.max_runtime - age)+zconf.cooldown_secs;
+			remaining[1] = (zconf.max_runtime - age)+zconf.cooldown_secs/1000;
 		}
 		if (zconf.max_results) {
 			double done = (double)zrecv.success_unique/zconf.max_results;
@@ -117,7 +117,7 @@ double compute_remaining_time(double age)
 		}
 		return min_d(remaining, sizeof(remaining)/sizeof(double));
 	} else {
-		return zconf.cooldown_secs - (now() - zsend.finish);
+		return zconf.cooldown_secs/1000 - (now() - zsend.finish);
 	}
 }
 

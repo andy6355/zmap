@@ -13,7 +13,7 @@
 #include <pthread.h>
 
 #include <pcap.h>
-#include <pcap/pcap.h>
+//#include <pcap/pcap.h>
 
 #include <netinet/tcp.h>
 #include <netinet/ip_icmp.h>
@@ -219,10 +219,12 @@ int recv_run(pthread_mutex_t *recv_ready_mutex)
 	}
 	
 	do {
+		int ret = 0;
 		if (zconf.dryrun) {
 			sleep(1);
 		} else {
-			if (pcap_dispatch(pc, 0, packet_cb, NULL) == -1) {
+			ret = pcap_dispatch(pc, 0, packet_cb, NULL);
+			if (ret == -1) {
 				log_fatal("recv", "pcap_dispatch error");
 			}
 			if (zconf.max_results && zrecv.success_unique >= zconf.max_results) {
@@ -230,7 +232,8 @@ int recv_run(pthread_mutex_t *recv_ready_mutex)
 				break;
 			}
 		}
-	} while (!(zsend.complete && (now()-zsend.finish > zconf.cooldown_secs)));
+		//log_debug("myinfo", "end pcap_dispatch() = %d", ret);
+	} while (!(zsend.complete && ((now()-zsend.finish) > zconf.cooldown_secs/1000.0)));
 	zrecv.finish = now();
 	// get final pcap statistics before closing
 	recv_update_pcap_stats();
