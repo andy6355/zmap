@@ -13,3 +13,4 @@ int parse_filter_string(char *filter);
 int validate_filter(node_t *root, fielddefset_t *fields);
 
 #endif /* ZMAP_FILTER_H */
+
